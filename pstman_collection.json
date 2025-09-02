@@ -1,0 +1,59 @@
+{
+    "info": {
+    "name": "Horoscope API Arabic",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+    {
+    "name": "Get Token",
+    "request": {
+    "method": "POST",
+    "header": [{ "key": "Content-Type", "value": "application/json" }],
+    "body": {
+    "mode": "raw",
+    "raw": "{\n \"email\": \"user@example.com\"\n}"
+    },
+    "url": { "raw": "http://localhost:8000/auth/token", "host": ["http://localhost:8000"], "path": ["auth", "token"] }
+    }
+    },
+    {
+    "name": "Get Horoscope (Freemium)",
+    "request": {
+    "method": "POST",
+    "header": [{ "key": "Content-Type", "value": "application/json" }],
+    "body": {
+    "mode": "raw",
+    "raw": "{\n \"الاسم\": \"أمينة\",\n \"تاريخ_الميلاد\": \"1990-05-14\",\n \"مجالات_الاهتمام\": \"💼 عمل\"\n}"
+    },
+    "url": { "raw": "http://localhost:8000/horoscope", "host": ["http://localhost:8000"], "path": ["horoscope"] }
+    }
+    },
+    {
+    "name": "Simulate Konnect Webhook",
+    "request": {
+    "method": "POST",
+    "header": [{ "key": "Content-Type", "value": "application/json" }],
+    "body": {
+    "mode": "raw",
+    "raw": "{\n \"user_id\": 1,\n \"status\": \"paid\"\n}"
+    },
+    "url": { "raw": "http://localhost:8000/billing/webhook", "host": ["http://localhost:8000"], "path": ["billing", "webhook"] }
+    }
+    },
+    {
+    "name": "Get Horoscope (Premium)",
+    "request": {
+    "method": "POST",
+    "header": [
+    { "key": "Content-Type", "value": "application/json" },
+    { "key": "Authorization", "value": "Bearer <your_token_here>" }
+    ],
+    "body": {
+    "mode": "raw",
+    "raw": "{\n \"الاسم\": \"أمينة\",\n \"تاريخ_الميلاد\": \"1990-05-14\",\n \"مجالات_الاهتمام\": \"💼 عمل\"\n}"
+    },
+    "url": { "raw": "http://localhost:8000/horoscope", "host": ["http://localhost:8000"], "path": ["horoscope"] }
+    }
+    }
+    ]
+    }
