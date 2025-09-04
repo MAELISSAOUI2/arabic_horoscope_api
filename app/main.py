@@ -1,8 +1,10 @@
 from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from datetime import datetime
 import hashlib
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 
 # Fixed relative imports
 from .config import settings
@@ -207,10 +209,10 @@ async def health():
         details["astronomy"] = f"error: {str(e)}"
     
     try:
-        # Test database connection
+        # Test database connection with proper text() usage
         from .database import SessionLocal
         db = SessionLocal()
-        db.execute("SELECT 1")
+        db.execute(text("SELECT 1"))
         db.close()
         details["database"] = "connected"
     except Exception as e:
@@ -268,23 +270,29 @@ async def get_zodiac_signs():
     }
 
 
-# Error handlers
+# Fixed Error handlers
 @app.exception_handler(404)
 async def not_found_handler(request: Request, exc):
-    return {
-        "error": "Not Found",
-        "message": "The requested endpoint does not exist",
-        "path": str(request.url.path)
-    }
+    return JSONResponse(
+        status_code=404,
+        content={
+            "error": "Not Found",
+            "message": "The requested endpoint does not exist",
+            "path": str(request.url.path)
+        }
+    )
 
 
 @app.exception_handler(500)
 async def internal_error_handler(request: Request, exc):
-    return {
-        "error": "Internal Server Error",
-        "message": "An unexpected error occurred",
-        "path": str(request.url.path)
-    }
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": "Internal Server Error", 
+            "message": "An unexpected error occurred",
+            "path": str(request.url.path)
+        }
+    )
 
 
 # Startup event
@@ -306,14 +314,15 @@ async def startup_event():
     try:
         from .database import SessionLocal
         db = SessionLocal()
-        db.execute("SELECT 1")
+        # Fixed: Use text() for raw SQL
+        db.execute(text("SELECT 1"))
         db.close()
         print("✓ Database connection working")
     except Exception as e:
         print(f"✗ Database connection failed: {e}")
 
 
-# Shutdown event
+# Shutdown event  
 @app.on_event("shutdown")
 async def shutdown_event():
     """
