@@ -1,8 +1,9 @@
 from sqlalchemy.orm import Session
-from app import models
+from . import models
 from datetime import datetime, timedelta
 import json
 from typing import Optional, Dict, Any
+
 
 def get_or_create_user(db: Session, email: str, name: str = None):
     user = db.query(models.User).filter(models.User.email == email).first()
@@ -13,11 +14,13 @@ def get_or_create_user(db: Session, email: str, name: str = None):
         db.refresh(user)
     return user
 
+
 def mark_user_premium(db: Session, user_id: int):
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if user:
         user.is_premium = True
         db.commit()
+
 
 def set_user_premium(db: Session, user_id: int, until: datetime):
     user = db.query(models.User).filter(models.User.id == user_id).first()
@@ -25,6 +28,7 @@ def set_user_premium(db: Session, user_id: int, until: datetime):
         user.is_premium = True
         user.premium_until = until
         db.commit()
+
 
 def log_subscription_event(db: Session, user_id: int, event_type: str, raw_payload: str):
     event = models.SubscriptionEvent(
@@ -35,6 +39,7 @@ def log_subscription_event(db: Session, user_id: int, event_type: str, raw_paylo
     db.add(event)
     db.commit()
 
+
 def persist_subscription_event(db: Session, user_id: int, event: dict):
     event_obj = models.SubscriptionEvent(
         user_id=user_id,
@@ -43,6 +48,7 @@ def persist_subscription_event(db: Session, user_id: int, event: dict):
     )
     db.add(event_obj)
     db.commit()
+
 
 def is_user_currently_premium(db: Session, user_id: int) -> bool:
     user = db.query(models.User).filter(models.User.id == user_id).first()
@@ -58,6 +64,7 @@ def is_user_currently_premium(db: Session, user_id: int) -> bool:
     
     return True
 
+
 # Cache functions
 def cache_get(db: Session, cache_key: str, tier: str) -> Optional[Dict[str, Any]]:
     cache_entry = db.query(models.CacheEntry).filter(
@@ -69,10 +76,18 @@ def cache_get(db: Session, cache_key: str, tier: str) -> Optional[Dict[str, Any]
         return json.loads(cache_entry.data)
     return None
 
+
 def cache_set(db: Session, cache_key: str, tier: str, data: Dict[str, Any]):
-    from app.config import settings
+    from .config import settings
     
     expires_at = datetime.utcnow() + timedelta(seconds=settings.CACHE_TTL_SECONDS)
+    
+    # Remove existing entry if exists
+    existing = db.query(models.CacheEntry).filter(
+        models.CacheEntry.cache_key == cache_key
+    ).first()
+    if existing:
+        db.delete(existing)
     
     cache_entry = models.CacheEntry(
         cache_key=cache_key,
@@ -81,6 +96,7 @@ def cache_set(db: Session, cache_key: str, tier: str, data: Dict[str, Any]):
     )
     db.add(cache_entry)
     db.commit()
+
 
 def log_request(db: Session, name: str, birth_date, interests: str, tier: str):
     request_log = models.RequestLog(

@@ -1,10 +1,10 @@
-# app/services/auth.py
 import jwt
 from datetime import datetime, timedelta
 from fastapi import HTTPException
 from typing import Optional
 from ..config import settings
 from ..crud import get_or_create_user
+
 
 def create_access_token(db, user_email: str, user_name: str = None):
     user = get_or_create_user(db, email=user_email, name=user_name)
@@ -17,6 +17,7 @@ def create_access_token(db, user_email: str, user_name: str = None):
     }
     token = jwt.encode(payload, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM)
     return token
+
 
 def decode_token(token: str):
     try:

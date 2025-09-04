@@ -1,9 +1,9 @@
-# app/models.py
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Date, Text
 from sqlalchemy.orm import relationship
 from datetime import datetime
 
-from database import Base
+from .database import Base
+
 
 class User(Base):
     __tablename__ = "users"
@@ -21,6 +21,7 @@ class User(Base):
         cascade="all, delete-orphan"
     )
 
+
 class SubscriptionEvent(Base):
     __tablename__ = "subscription_events"
 
@@ -32,6 +33,7 @@ class SubscriptionEvent(Base):
 
     user = relationship("User", back_populates="subscriptions")
 
+
 class CacheEntry(Base):
     __tablename__ = "cache_entries"
     
@@ -40,6 +42,7 @@ class CacheEntry(Base):
     data = Column(Text, nullable=False)
     expires_at = Column(DateTime, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+
 
 class RequestLog(Base):
     __tablename__ = "request_logs"
